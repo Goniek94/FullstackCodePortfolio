@@ -1,4 +1,4 @@
-Marketplace samochodowy — podsumowanie dla Klienta
+Marketplace samochodowy
 
 Opis i status
 Stworzyłem marketplace samochodowy całkowicie samodzielnie: od pierwszego kontaktu i zebrania wymagań, przez projekt architektury, implementację backendu, frontendu oraz zabezpieczeń, aż po pierwsze wdrożenie na serwery (VPS, NGINX, SSL, PM2). Projekt jest na ostatnim etapie wdrożenia — po pierwszym release — i jeszcze niedostępny publicznie z uwagi na finalne poprawki (stabilizacja, UX/SEO). Realizacja zajęła ok. 12 miesięcy. Ze względu na NDA pełne repozytoria nie są udostępniane; po uzgodnieniu z Klientem mogę pokazać wybrane fragmenty kodu.
