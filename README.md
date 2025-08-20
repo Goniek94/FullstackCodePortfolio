@@ -1,3 +1,92 @@
+Car Marketplace
+Overview & Status
+
+I built a car marketplace end-to-end and single-handedly: from first client contact and requirements gathering, through architecture design, backend/frontend implementation and security, to the first server deployment (VPS, NGINX, SSL, PM2). The project is in the final rollout stage — after the first release — and is not yet publicly available due to final fixes (stabilization, UX/SEO). Total delivery time: ~12 months. Due to NDA, full repositories are not shared; selected code snippets can be shown upon agreement with the client.
+
+Key Features
+
+Listings & search: advanced filters (make/model/year/price/location, etc.), results cards, vehicle details; statistics (views/favorites), publish/refresh/archive flows.
+
+Listing form: multi-step, validations, suggestions (make/model/version), drag-and-drop images, preview, draft saving.
+
+CEPIK integration: vehicle data verification/enrichment (e.g., VIN/registration no.), consistency checks and mismatch alerts.
+
+Payments integration: featured/promoted listings, transaction statuses & history, webhook-ready, aligned with the publish flow.
+
+Dynamic data loading: pagination/infinite scroll, instant re-fetch on filter change, caching and optimistic UI.
+
+Users & security: sign-up/sign-in, roles/permissions; HttpOnly cookies (access/refresh), validations, rate-limiting, XSS/NoSQL sanitization.
+
+Messaging & notifications: user-to-user messages + real-time notifications (Socket.IO, retry/offline).
+
+Media: image upload with limits and automatic processing (Sharp — compression/conversion, thumbnails).
+
+Custom admin panel: bespoke views for listing moderation, user management, logs/reports.
+
+PWA & performance: service worker (offline, network-first for API), code-splitting, critical resource preload, Core Web Vitals monitoring.
+
+SEO/UX: Open Graph / Twitter Cards, JSON-LD, mobile-first UI (Tailwind/MUI), a consistent mini design system.
+
+Tech Stack
+Frontend
+
+React 18 (Create React App), TypeScript, React Router 6
+
+Context API (Auth/Notification/Responsive), Axios with interceptors (auto-refresh on 401)
+
+Socket.IO Client (real-time), Tailwind CSS, Material UI / Headless UI / Radix UI
+
+Recharts (charts), Leaflet (maps), React Toastify (notifications)
+
+PWA: manifest, service worker, critical asset caching
+
+Backend
+
+Node.js (ESM), Express 4, MongoDB (Mongoose)
+
+JWT in HttpOnly cookies (access/refresh, rotation), requireAuth middleware
+
+Socket.IO (notifications/chat), Multer + Sharp (upload/image processing)
+
+Security: Helmet, CORS, express-rate-limit, express-mongo-sanitize, validations (Joi/express-validator)
+
+Cron (node-cron): expired-listing archiving, resource cleanup
+
+Integrations: CEPIK (vehicle verification), payments (webhook-ready)
+
+Infra/DevOps
+
+VPS, NGINX (reverse proxy + WebSocket upgrade), PM2, SSL
+
+.env environment configuration, logging and basic monitoring
+
+Scope of Responsibility (end-to-end)
+
+Requirements & planning → architecture design → backend & frontend implementation → integrations (CEPIK, payments, media, real-time) → security layer → server configuration & first deployment → stabilization (bugfixes, UX/SEO).
+
+Selected Code Snippets (available upon request — NDA)
+
+Backend (Node.js)
+
+scheduledTasks.js — background jobs (CRON): expiring-listing notifications, auto-archiving, resource cleanup (system stability & hygiene).
+
+adRoutes.js — /stats endpoint using MongoDB Aggregation Framework (analytics beyond CRUD).
+
+AdSearchRoutes.js — sorting logic prioritizing featured listings (business rules → efficient queries).
+
+Frontend (React)
+
+AuthContext.js — session/auth management (Context API, HttpOnly cookies, token refresh).
+
+App.js — app structure, routing (incl. protected routes), code-splitting (React.lazy).
+
+ListingDetails.js — complex detail view combining multiple endpoints, state management and dynamic UI.
+
+
+
+
+PL VERSION
+
 Marketplace samochodowy
 
 Opis i status
