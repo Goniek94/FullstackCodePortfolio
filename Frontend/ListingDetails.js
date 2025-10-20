@@ -1,6 +1,7 @@
 // src/components/listings/details/ListingDetails.js
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { ArrowLeft } from "lucide-react";
 import ImageGallery from "./ImageGallery";
 import TechnicalDetails from "./TechnicalDetails";
@@ -13,8 +14,11 @@ import CollapsibleSection from "./CollapsibleSection";
 import AuthService from "../../../services/api/authApi";
 import ViewHistoryService from "../../../services/viewHistoryService";
 
-// --- NOWE: bazowy URL API z env + helper ---
-const API_URL = (process.env.REACT_APP_API_URL || "docelowy backend").replace(/\/$/, "");
+// --- NEW: base API URL from env + helper ---
+const API_URL = (process.env.REACT_APP_API_URL || "Docelowe").replace(
+  /\/$/,
+  ""
+);
 const api = (path) => `${API_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 
 const ListingDetails = () => {
@@ -34,45 +38,55 @@ const ListingDetails = () => {
     const fetchListing = async () => {
       setLoading(true);
       try {
-        // Pobierz ogłoszenie
-        const response = await fetch(api(`/api/ads/${id}`)); // GET bez zbędnych nagłówków
+        // Fetch listing
+        const response = await fetch(api(`/api/ads/${id}`)); // GET without unnecessary headers
         if (!response.ok) throw new Error("Nie znaleziono ogłoszenia");
         const data = await response.json();
         setListing(data);
 
-        // Dodaj do historii
+        // Add to history
         ViewHistoryService.addToViewHistory(data);
 
-        // Pobierz komentarze
-        const res = await fetch(api(`/api/comments/${id}`), { credentials: "include" });
+        // Fetch comments
+        const res = await fetch(api(`/api/comments/${id}`), {
+          credentials: "include",
+        });
         if (res.ok) {
           const data = await res.json();
           setComments(
             data.map((c, idx) => ({
               id: c._id || idx + 1,
               author: c.user?.name
-                ? `${c.user.name}${c.user.lastName ? " " + c.user.lastName : ""}`
+                ? `${c.user.name}${
+                    c.user.lastName ? " " + c.user.lastName : ""
+                  }`
                 : "Użytkownik",
               userId: c.user?._id || c.user?.id,
               text: c.content,
               image: c.image,
-              date: c.createdAt ? new Date(c.createdAt).toISOString().split("T")[0] : "",
+              date: c.createdAt
+                ? new Date(c.createdAt).toISOString().split("T")[0]
+                : "",
               isEditing: false,
             }))
           );
         }
 
-        // Podobne ogłoszenia
+        // Similar listings
         const searchParams = new URLSearchParams({
           brand: data.brand || data.make,
           model: data.model || "",
         });
-        const similarResponse = await fetch(api(`/api/ads/search?${searchParams}`));
+        const similarResponse = await fetch(
+          api(`/api/ads/search?${searchParams}`)
+        );
         const similarData = await similarResponse.json();
         setSimilarListings(
           (similarData.ads || []).slice(0, 4).map((ad) => ({
             id: ad._id,
-            title: `${ad.brand || ad.make || ""} ${ad.model || ""}`.trim() || "Ogłoszenie",
+            title:
+              `${ad.brand || ad.make || ""} ${ad.model || ""}`.trim() ||
+              "Ogłoszenie",
             price: `${ad.price?.toLocaleString() || 0} zł`,
             year: ad.year?.toString() || "Nieznany",
             mileage: `${ad.mileage?.toLocaleString() || 0} km`,
@@ -93,7 +107,7 @@ const ListingDetails = () => {
     if (id) fetchListing();
   }, [id]);
 
-  // Dodawanie komentarza
+  // Adding comment
   const handleAddComment = async (text, imageFile) => {
     setCommentError(null);
     if (!id) return;
@@ -105,15 +119,18 @@ const ListingDetails = () => {
       const resp = await fetch(api(`/api/comments/${id}`), {
         method: "POST",
         credentials: "include",
-        body: formData, // nie ustawiaj ręcznie Content-Type przy FormData
+        body: formData, // don't set Content-Type manually with FormData
       });
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
         setCommentError(errData.message || "Błąd dodawania komentarza");
         return;
       }
-      // Odśwież komentarze
-      const res = await fetch(api(`/api/comments/${id}`), { credentials: "include" });
+
+      // Refresh comments
+      const res = await fetch(api(`/api/comments/${id}`), {
+        credentials: "include",
+      });
       if (res.ok) {
         const data = await res.json();
         setComments(
@@ -125,7 +142,9 @@ const ListingDetails = () => {
             userId: c.user?._id || c.user?.id,
             text: c.content,
             image: c.image,
-            date: c.createdAt ? new Date(c.createdAt).toISOString().split("T")[0] : "",
+            date: c.createdAt
+              ? new Date(c.createdAt).toISOString().split("T")[0]
+              : "",
             isEditing: false,
           }))
         );
@@ -162,7 +181,9 @@ const ListingDetails = () => {
   const brand = listing.make || listing.brand || "";
   const model = listing.model || "";
   const vehicleTitle = `${brand} ${model}`.trim();
-  const price = listing.price ? `${listing.price.toLocaleString()} zł` : "Cena na żądanie";
+  const price = listing.price
+    ? `${listing.price.toLocaleString()} zł`
+    : "Cena na żądanie";
 
   return (
     <div className="bg-[#FCFCFC] py-8 px-4 lg:px-[8%] min-h-screen">
@@ -182,7 +203,9 @@ const ListingDetails = () => {
               images={
                 listing.images && listing.images.length > 0
                   ? listing.images.map((img) =>
-                      img.startsWith("http") ? img : api(img.startsWith("/") ? img : `/${img}`)
+                      img.startsWith("http")
+                        ? img
+                        : api(img.startsWith("/") ? img : `/${img}`)
                     )
                   : []
               }
@@ -190,9 +213,13 @@ const ListingDetails = () => {
 
             {listing.headline && (
               <div className="bg-white p-6 shadow-md rounded-sm">
-                <h2 className="text-xl font-bold mb-4 text-black">Nagłówek ogłoszenia</h2>
+                <h2 className="text-xl font-bold mb-4 text-black">
+                  Nagłówek ogłoszenia
+                </h2>
                 <div className="bg-gray-50 p-4 rounded-md border-l-4 border-[#35530A]">
-                  <p className="text-lg font-medium text-gray-800">{listing.headline}</p>
+                  <p className="text-lg font-medium text-gray-800">
+                    {listing.headline}
+                  </p>
                 </div>
               </div>
             )}
@@ -218,7 +245,9 @@ const ListingDetails = () => {
             images={
               listing.images && listing.images.length > 0
                 ? listing.images.map((img) =>
-                    img.startsWith("http") ? img : api(img.startsWith("/") ? img : `/${img}`)
+                    img.startsWith("http")
+                      ? img
+                      : api(img.startsWith("/") ? img : `/${img}`)
                   )
                 : []
             }
@@ -227,7 +256,9 @@ const ListingDetails = () => {
           <div className="bg-white p-6 shadow-md rounded-sm">
             <div className="text-center">
               {vehicleTitle && (
-                <h1 className="text-2xl font-bold text-black mb-4">{vehicleTitle}</h1>
+                <h1 className="text-2xl font-bold text-black mb-4">
+                  {vehicleTitle}
+                </h1>
               )}
               <div className="text-2xl font-bold text-[#35530A]">{price}</div>
             </div>
@@ -237,9 +268,13 @@ const ListingDetails = () => {
 
           {listing.headline && (
             <div className="bg-white p-6 shadow-md rounded-sm">
-              <h2 className="text-xl font-bold mb-4 text-black">Nagłówek ogłoszenia</h2>
+              <h2 className="text-xl font-bold mb-4 text-black">
+                Nagłówek ogłoszenia
+              </h2>
               <div className="bg-gray-50 p-4 rounded-md border-l-4 border-[#35530A]">
-                <p className="text-lg font-medium text-gray-800">{listing.headline}</p>
+                <p className="text-lg font-medium text-gray-800">
+                  {listing.headline}
+                </p>
               </div>
             </div>
           )}
